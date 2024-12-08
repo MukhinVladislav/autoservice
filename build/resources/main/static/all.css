@@ -1,0 +1,505 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'SF Pro Display', sans-serif;
+    background-color: #FFFFFF;
+    color: #333333;
+    line-height: 1.6;
+    overflow-x: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+
+h1, h4, h5 {
+    color: #1E1E1E;
+    text-align: center;
+    font-weight: 600;
+}
+
+h1 {
+    font-size: 3rem;
+    margin-top: 50px;
+    color: #D32F2F;
+}
+
+h4 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #D32F2F;
+}
+
+h5 {
+    font-size: 1rem;
+    color: #495057;
+    margin-bottom: 15px;
+}
+
+
+.container, .container-form {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+
+.table-container, .author-frame {
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    margin-top: 50px;
+}
+
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.pagination-container button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: #D32F2F;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.pagination-container button:hover {
+    background-color: #B71C1C;
+}
+
+.pagination-container button.active {
+    background-color: #FF5722;
+}
+
+
+.form-control-form {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #D32F2F;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.form-control-form:focus {
+    border-color: #B71C1C;
+}
+
+.btn-success-form, .btn-secondary-form {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-success-form {
+    background-color: #D32F2F;
+    color: white;
+}
+
+.btn-success-form:hover {
+    background-color: #B71C1C;
+}
+
+.btn-secondary-form {
+    background-color: #FF3B30;
+    color: white;
+    margin-left: 10px;
+}
+
+.btn-secondary-form:hover {
+    background-color: #C93027;
+}
+
+
+.add-button {
+    padding: 12px 24px;
+    border: none;
+    background-color: #D32F2F;
+    color: white;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+.add-button:hover {
+    background-color: #B71C1C;
+}
+
+
+table {
+    width: 100%;
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #E0E0E5;
+}
+
+th {
+    background-color: #D32F2F;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+table tbody td {
+    color: #1E1E1E;
+}
+
+.add-button-container {
+    text-align: right;
+    margin-top: 20px;
+}
+
+
+.action-btn {
+    border: none;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+    color: white;
+    font-size: 14px;
+}
+
+.edit-btn {
+    background-color: #D32F2F;
+    margin-right: 5px;
+}
+
+.edit-btn:hover {
+    background-color: #B71C1C;
+}
+
+.delete-btn {
+    background-color: #FF3B30;
+}
+
+.delete-btn:hover {
+    background-color: #C93027;
+}
+
+
+@media (max-width: 768px) {
+    .search-bar input[type="text"] {
+        width: 100%;
+    }
+
+    .table-container {
+        padding: 20px;
+    }
+
+    .container, .container-form {
+        padding: 15px;
+    }
+
+    .navbar.navbar-expand-lg.navbar-dark .navbar-nav {
+        text-align: center;
+    }
+
+    .navbar.navbar-expand-lg.navbar-dark .navbar-nav .nav-link {
+        padding: 10px 20px;
+    }
+
+    .card {
+        padding: 15px;
+        width: 90%;
+    }
+}
+
+
+.nav-list {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #D32F2F;
+    margin: 0 15px;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 5px 10px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: #D32F2F;
+    color: white;
+    border-radius: 5px;
+}
+
+
+.author-frame {
+    margin: 40px auto;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    background-color: #FFFFFF;
+    text-align: center;
+    border: 1px solid #E0E0E5;
+}
+
+.author-frame h5 {
+    margin-bottom: 20px;
+    color: #1E1E1E;
+}
+
+.author-frame p {
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: #495057;
+}
+
+
+.content p {
+    font-size: 1.2rem;
+    color: #333333;
+    line-height: 1.6;
+    margin-top: 20px;
+    text-align: center;
+    font-weight: 400;
+}
+.content {
+    padding: 50px 15px;
+    margin-top: 50px;
+}
+
+.content h1 {
+    font-size: 2.5rem;
+    color: #D32F2F;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Стилизация навигационной панели */
+.navbar.navbar-expand-lg.navbar-dark {
+    background-color: rgba(0, 0, 0, 0.89);
+    border-bottom: 2px solid #D32F2F;
+}
+
+.navbar.navbar-expand-lg.navbar-dark .navbar-brand {
+    font-size: 1.8rem;
+    color: #ffffff;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: color 0.3s ease;
+}
+
+.navbar.navbar-expand-lg.navbar-dark .navbar-brand:hover {
+    color: #D32F2F;
+}
+
+.navbar.navbar-expand-lg.navbar-dark .navbar-nav .nav-link {
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 12px 15px;
+    text-transform: capitalize;
+    transition: all 0.3s ease;
+}
+
+.navbar.navbar-expand-lg.navbar-dark .navbar-nav .nav-link:hover {
+    color: #D32F2F;
+    background-color: rgba(211, 47, 47, 0.2);
+    border-radius: 5px;
+}
+
+.navbar.navbar-expand-lg.navbar-dark .navbar-nav .nav-item {
+    margin-left: 20px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+
+}
+
+
+.wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #000;
+    font-weight: 700;
+    margin-bottom: 30px;
+}
+
+
+table {
+    width: 100%;
+    table-layout: fixed;
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+table th,
+table td {
+    padding: 15px;
+    text-align: center;
+    color: #333;
+}
+
+table th {
+    background-color: #000000;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table tr:hover {
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+
+.btn {
+    font-size: 1rem;
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+
+.btn-success {
+    background-color: #dc3545 !important;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+.btn-success:hover {
+    background-color: rgba(220, 53, 69, 0.65) !important;
+    border: none;
+}
+
+
+.btn-warning {
+    background-color: rgba(0, 0, 0, 0.89) !important;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+.btn-warning:hover {
+    background-color: rgba(0, 0, 0, 0.65) !important;
+    color: white;
+    border: none;
+}
+
+
+.btn-primary {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+.btn-primary:hover {
+    background-color: #aa2836;
+    color: white;
+    border: none;
+}
+
+.btn-danger {
+    background-color: #000000;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 14px;
+}
+.btn-danger:hover {
+    background-color: rgba(0, 0, 0, 0.74);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+.btn:hover {
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    table th, table td {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+
+    .wrapper {
+        padding: 0 10px;
+    }
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+
+button.close {
+    background: none;
+    border: none;
+    color: #000;
+    font-size: 2rem;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+}
+
+button.close:hover {
+    color: #D32F2F;
+}
+
+
+button.close:focus {
+    outline: none;
+}

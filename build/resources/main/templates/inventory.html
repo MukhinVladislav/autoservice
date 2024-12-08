@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="ru">
+<head>
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+  <meta charset="UTF-8">
+  <title>Инормационно-справочная система «Автосервис»</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link href="all.css" rel="stylesheet" type="text/css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+<nav class="navbar navbar-expand-lg navbar-dark justify-content-between">
+  <div class="container-fluid">
+    <a class="navbar-brand" th:href="@{/}">Автосервис</a>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li sec:authorize="hasRole('ADMIN') or hasRole('WORKER')" class="nav-item">
+          <a class="nav-link active" aria-current="page" th:href="@{/order}">Заказы</a>
+        </li>
+        <li sec:authorize="hasRole('ADMIN') or hasRole('WORKER')" class="nav-item">
+          <a class="nav-link active" aria-current="page" th:href="@{/client}">Клиенты</a>
+        </li>
+        <li sec:authorize="hasRole('ADMIN') or hasRole('WORKER')" class="nav-item">
+          <a class="nav-link active" aria-current="page" th:href="@{/inventory}">Склад</a>
+        </li>
+        <li sec:authorize="hasRole('ADMIN')" class="nav-item"><a th:href="@{/admin}" class="nav-link" aria-selected="false" role="tab">Админ Панель</a></li>
+        <li sec:authorize="hasRole('CLIENT')" class="nav-item"><a th:href="@{/profile}" class="nav-link" aria-selected="false" role="tab">Мой профиль</a></li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" th:href="@{/logout}">Выход</a>
+        </li>
+
+      </ul>
+    </div>
+    <div id="google_translate_element"></div>
+  </div>
+</nav>
+<div class="wrapper" style="max-width: 1200px; margin: 0 auto">
+  <br>
+  <blockquote class="blockquote text-center"><h1>Склад</h1></blockquote>
+  <div class="row">
+    <div class="text-center">
+      <h4>Поиск детали по любому критерию:</h4>
+      <form th:action="@{/inventory}">
+        <input type="text" name="keyword" id="keyword" size="30" th:value="${keyword}" required/>
+        <input type="submit" class="btn btn-success btn-sm" value="Поиск"/>
+        <input type="button" class="btn btn-warning btn-sm" value="Очистить" id="btnClear"
+               onclick="clearSearch()"/>
+      </form>
+    </div>
+  </div>
+  <table class="table table-striped table-hover table-responsive">
+    <thead>
+    <tr>
+      <th scope="col" onclick="sortTable(0)" style="cursor: pointer">ID</th>
+      <th scope="col" onclick="sortTable(1)" style="cursor: pointer" data-type="string">Название детали</th>
+      <th scope="col" onclick="sortTable(2)" style="cursor: pointer" data-type="string">Для автомобиля</th>
+      <th scope="col" onclick="sortTable(3)" style="cursor: pointer" data-type="string">Остаток</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="inventory: ${listInventory}">
+      <td th:text="${inventory.id}"></td>
+      <td th:text="${inventory.partName}"></td>
+      <td th:text="${inventory.car_name}"></td>
+      <td th:text="${inventory.quantity}"></td>
+      <td>
+        <button id="edit-inventory" type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#inventoryEditDialog" th:data-inventoryId="${inventory.id}">
+          <i class="fas fa-pencil-alt"></i>
+        </button>
+        <a th:href="@{'/inventory/delete/' + ${inventory.id}}">
+          <button type="button" class="btn btn-danger"><i class="far fa-trash-alt"></i></button>
+        </a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <p class="text-white">
+    <script type="text/javascript">
+      function getRowsColumn() {
+        let table = document.getElementById('1')
+        let tBody = table.querySelector('tbody')
+        const count = tBody.querySelectorAll('tr').length;
+        document.write('Количество клиентов в таблице: ' + count)
+      }
+
+      getRowsColumn()
+    </script>
+  </p>
+  <blockquote class="blockquote text-center">
+    <button id="new-inventory" type="button" class="btn btn-primary" data-toggle="modal" data-target="#inventoryNewDialog">Добавить деталь</button>
+  </blockquote>
+</div>
+
+
+<script type="text/javascript">
+  function clearSearch() {
+    window.location = "[[@{/inventory}]]";
+  }
+  function sortTable(n) {
+    let table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.querySelector("table");
+    switching = true;
+    dir = "asc";
+
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+
+      for (i = 1; i < rows.length - 1; i++) {
+        shouldSwitch = false;
+        x = rows[i].getElementsByTagName("td")[n];
+        y = rows[i + 1].getElementsByTagName("td")[n];
+
+        let xContent = x.textContent || x.innerText;
+        let yContent = y.textContent || y.innerText;
+
+        let xType = table.rows[0].cells[n].getAttribute('data-type');
+        let isDate = xType === 'date';
+
+
+        if (isDate) {
+          xContent = new Date(xContent).getTime();
+          yContent = new Date(yContent).getTime();
+        }
+
+        if (xType === 'string') {
+          xContent = xContent.toLowerCase();
+          yContent = yContent.toLowerCase();
+        }
+
+        if (dir === "asc") {
+          if (xContent > yContent) {
+            shouldSwitch = true;
+            break;
+          }
+        } else if (dir === "desc") {
+          if (xContent < yContent) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+      }
+
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        switchcount++;
+      } else {
+        if (switchcount === 0 && dir === "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
+    }
+  }
+
+</script>
+
+<div class="modal fade" id="inventoryEditDialog" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-black" id="exampleModalLabel">Редактирование детали</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <input type="hidden" id="inventory-id">
+          <div class="form-group">
+            <label for="inventory-partName" class="col-form-label">Деталь</label>
+            <input type="text" class="form-control" id="inventory-partName">
+          </div>
+          <div class="form-group">
+            <label for="inventory-car_name" class="col-form-label">Для автомобиля</label>
+            <input type="text" class="form-control" id="inventory-car_name">
+          </div>
+          <div class="form-group">
+            <label for="inventory-quantity" class="col-form-label">Остаток</label>
+            <input type="text" class="form-control" id="inventory-quantity">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+        <button id="save-inventory-button" type="button" class="btn btn-primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script>
+  $('#inventoryEditDialog').on('shown.bs.modal', function (event) {
+    let button = $(event.relatedTarget)
+    let inventoryId = button.data('inventoryid')
+
+    if (inventoryId) {
+      $.get({
+        url: '/api/v1/inventory/' + inventoryId,
+        success: (data) => {
+          let modal = $(this)
+          modal.find('#inventory-id').val(data.id)
+          modal.find('#inventory-partName').val(data.partName)
+          modal.find('#inventory-car_name').val(data.car_name)
+          modal.find('#inventory-quantity').val(data.quantity)
+
+        },
+        error: (err) => {
+          alert(err);
+        }
+      });
+    }
+  })
+
+  $('#save-inventory-button').click(function() {
+
+    let modal = $('#inventoryEditDialog');
+    let inventory = {
+      id: modal.find('#inventory-id').val(),
+      partName: modal.find('#inventory-partName').val(),
+      car_name: modal.find('#inventory-car_name').val(),
+      quantity: modal.find('#inventory-quantity').val(),
+    };
+
+
+
+
+    let token = $("meta[name='_csrf']").attr("content");
+    let header = $("meta[name='_csrf_header']").attr("content");
+
+
+    if (!token || !header) {
+      console.error("CSRF token or header is not found. Please check if meta tags are correctly included.");
+      alert("Ошибка: CSRF токен или заголовок не найдены.");
+      return;
+    }
+
+
+    $.ajax({
+      url: '/api/v1/inventory/' + inventory.id,
+      type: 'PUT',
+      data: JSON.stringify(inventory),
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      beforeSend: function(xhr) {
+        console.log('Перед отправкой запроса добавляем CSRF заголовок');
+        console.log('CSRF Token:', token);
+        console.log('CSRF Header:', header);
+        xhr.setRequestHeader(header, token);
+      },
+      success: function() {
+        console.log('Деталь успешно сохранена');
+        location.reload();
+      },
+      error: function(err) {
+        console.error('Ошибка при редактировании детали: ', err);
+        alert("Ошибка при редактировании детали: " + err.responseText);
+      }
+    });
+
+    modal.modal('hide');
+  });
+
+
+</script>
+
+
+
+
+
+<div class="modal fade" id="inventoryNewDialog" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-black" id="ModalLabel">Добавление детали</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <input type="hidden" id="inventory-idn">
+          <div class="form-group">
+            <label for="inventory-partNamen" class="col-form-label">Деталь</label>
+            <input type="text" class="form-control" id="inventory-partNamen">
+          </div>
+          <div class="form-group">
+            <label for="inventory-car_namen" class="col-form-label">Для автомобиля</label>
+            <input type="text" class="form-control" id="inventory-car_namen">
+          </div>
+          <div class="form-group">
+            <label for="inventory-quantityn" class="col-form-label">Остаток</label>
+            <input type="text" class="form-control" id="inventory-quantityn">
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+        <button id="save-new-inventory-button" type="button" class="btn btn-primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script>
+  $('#save-new-inventory-button').click(function() {
+    let modal = $('#inventoryNewDialog');
+    let inventory = {
+      partName: modal.find('#inventory-partNamen').val(),
+      car_name: modal.find('#inventory-car_namen').val(),
+      quantity: modal.find('#inventory-quantityn').val(),
+    };
+
+    $.ajax({
+      url: '/api/v1/inventory',
+      type: 'POST',
+      data: JSON.stringify(inventory),
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      beforeSend: function(xhr) {
+        var token = $("meta[name='_csrf']").attr("content");
+        var header = $("meta[name='_csrf_header']").attr("content");
+        xhr.setRequestHeader(header, token);
+      },
+      success: function() {
+        location.reload();
+      },
+      error: function(err) {
+        alert("Ошибка при добавлении детали: " + err.responseText);
+      }
+    });
+
+    modal.modal('hide');
+  });
+
+
+</script>
+
+</body>
+</html>
