@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Информационно-справочная система «Автосервис»</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="all.css" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+<nav class="navbar navbar-expand-lg navbar-dark justify-content-between">
+    <div class="container-fluid">
+        <a class="navbar-brand" th:href="@{/}">Автосервис</a>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a sec:authorize="hasRole('ADMIN') or hasRole('WORKER')" class="nav-link active" aria-current="page" th:href="@{/order}">Заказы</a>
+                </li>
+                <li sec:authorize="hasRole('ADMIN') or hasRole('WORKER')" class="nav-item">
+                    <a class="nav-link active" aria-current="page" th:href="@{/client}">Клиенты</a>
+                </li>
+                <li sec:authorize="hasRole('ADMIN') or hasRole('WORKER')" class="nav-item">
+                    <a class="nav-link active" aria-current="page" th:href="@{/inventory}">Склад</a>
+                </li>
+                <li sec:authorize="hasRole('ADMIN')" class="nav-item"><a th:href="@{/admin}" class="nav-link active" aria-selected="false" role="tab">Админ Панель</a></li>
+                <li sec:authorize="hasRole('CLIENT')" class="nav-item"><a th:href="@{/profile}" class="nav-link active" aria-selected="false" role="tab">Мой профиль</a></li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" th:href="@{/logout}">Выход</a>
+                </li>
+            </ul>
+        </div>
+        <div id="google_translate_element"></div>
+    </div>
+</nav>
+
+<div class="wrapper" style="max-width: 1200px; margin: 0 auto">
+    <br>
+    <blockquote class="blockquote text-center">
+        <h1>Заказы</h1>
+    </blockquote>
+    <div class="row">
+        <div class="text-center">
+            <h4>Поиск заказа по любому критерию:</h4>
+            <form th:action="@{/order}">
+                <input type="text" name="keyword" id="keyword" size="30" th:value="${keyword}" required/>
+                <input type="submit" class="btn btn-success btn-sm" value="Поиск"/>
+                <input type="button" class="btn btn-warning btn-sm" value="Очистить" id="btnClear" onclick="clearSearch()"/>
+            </form>
+        </div>
+    </div>
+    <table class="table table-striped table-hover table-responsive">
+        <thead>
+        <tr>
+            <th scope="col" >ID</th>
+            <th scope="col">Имя клиента</th>
+            <th scope="col" >Статус заказа</th>
+            <th scope="col">Дата заказа</th>
+            <th scope="col" >Услуга</th>
+            <th scope="col" >Марка и модель автомобиля</th>
+            <th scope="col">Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order: ${listOrder}">
+            <th scope="row" th:text="${order.id}"></th>
+            <td th:text="${order.client.name}"></td>
+            <td th:text="${order.status}"></td>
+            <td class="date" th:text="${order.orderDate}"></td>
+            <td th:text="${order.description}"></td>
+            <td th:text="${order.car}"></td>
+            <td>
+                <button id="edit-order" type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#orderEditDialog" th:data-orderId="${order.id}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <a th:href="@{'/order/delete/' + ${order.id}}">
+                    <button type="button" class="btn btn-danger"><i class="far fa-trash-alt"></i></button>
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p>
+        <script type="text/javascript">
+            function getRowsColumn() {
+                let table = document.getElementById('1')
+                let tBody = table.querySelector('tbody')
+                const count = tBody.querySelectorAll('tr').length;
+                document.write('Количество заказов в таблице: ' + count)
+            }
+
+            getRowsColumn()
+        </script>
+    </p>
+
+    <blockquote class="blockquote text-center">
+        <button id="new-order" type="button" class="btn btn-primary" data-toggle="modal" data-target="#orderNewDialog">Добавить заказ</button>
+    </blockquote>
+
+    <h5 class="text-center">Подсчет количества заказов за месяц</h5>
+    <table id="table" class="table table-striped table-hover"></table>
+    <h5 class="text-center">Среднее количество заказов в месяц: <span id="variable"></span></h5>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <canvas id="histogram" style="width:100%; max-width:800px; margin: 50px auto"></canvas>
+</div>
+
+</body>
+
+
+
+<script type="text/javascript">
+    function clearSearch() {
+        window.location = "[[@{/order}]]";
+    }
+
+    let dates = document.getElementsByClassName('date')
+
+    let x = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    let y = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+
+    for (let i = 0; i < dates.length; i++) {
+        month = dates[i].innerText.slice(5, 7)
+        y[parseInt(month)-1] += 1
+    }
+    let sumOfNumbers = y.reduce((acc, number) => acc + number, 0);
+
+    let numberOfNonZeroMonths = y.filter(number => number > 0).length;
+
+    let variable = numberOfNonZeroMonths > 0 ? (sumOfNumbers / numberOfNonZeroMonths).toFixed(2) : 0;
+
+    document.getElementById('variable').innerHTML = variable;
+    let tr = document.createElement('tr');
+    for (let elem of x) {
+        let th = document.createElement('th');
+        th.textContent = elem;
+        tr.appendChild(th);
+        table.appendChild(tr);
+    }
+    let tr2 = document.createElement('tr');
+    for (let elem of y) {
+        let td = document.createElement('td');
+        td.textContent = elem;
+        tr2.appendChild(td);
+        table.appendChild(tr2);
+    }
+
+
+    new Chart("histogram", {
+        type: "bar",
+        data: {
+            labels: x,
+            datasets: [{
+                label: 'Количество клиентов за месяц',
+                backgroundColor: 'rgba(220,53,69,0.6)',
+                borderColor: 'rgb(255,18,41)',
+                borderWidth: 1,
+                barPercentage: 1,
+                categoryPercentage: 1,
+                borderRadius: 5,
+                data: y,
+                color: 'rgba(255, 255, 255)',
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: "black"
+                    }
+                },
+            },
+            scales: {
+                y: {
+                    ticks: { color: 'black' }
+                },
+                x: {
+                    ticks: { color: 'black' }
+                }
+            },
+        },
+    });
+
+    function sortTable(n) {
+        let table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.querySelector("table");
+        switching = true;
+        dir = "asc";
+
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+
+            for (i = 1; i < rows.length - 1; i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("td")[n];
+                y = rows[i + 1].getElementsByTagName("td")[n];
+
+                let xContent = x.textContent || x.innerText;
+                let yContent = y.textContent || y.innerText;
+
+                let xType = table.rows[0].cells[n].getAttribute('data-type');
+                let isDate = xType === 'date';
+
+
+                if (isDate) {
+                    xContent = new Date(xContent).getTime();
+                    yContent = new Date(yContent).getTime();
+                }
+
+                if (xType === 'string') {
+                    xContent = xContent.toLowerCase();
+                    yContent = yContent.toLowerCase();
+                }
+
+                if (dir === "asc") {
+                    if (xContent > yContent) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if (dir === "desc") {
+                    if (xContent < yContent) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount++;
+            } else {
+                if (switchcount === 0 && dir === "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+    }
+
+
+</script>
+
+<div class="modal fade" id="orderEditDialog" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-black" id="exampleModalLabel">Редактирование заказа</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <input type="hidden" id="order-id">
+
+                    <div class="form-group">
+                        <label for="order-client" class="col-form-label">Имя клиента</label>
+                        <select class="form-control" id="order-client"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="order-status" class="col-form-label">Статус</label>
+                        <select class="form-control" id="order-status">
+                            <option value="Принято">Принято</option>
+                            <option value="В работе">В работе</option>
+                            <option value="Выполнено">Выполнено</option>
+                            <option value="Отменено">Отменено</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="order-orderDate" class="col-form-label">Дата заказа</label>
+                        <input type="date" class="form-control" id="order-orderDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="order-description" class="col-form-label">Услуга</label>
+                        <input type="text" class="form-control" id="order-description">
+                    </div>
+                    <div class="form-group">
+                        <label for="order-car" class="col-form-label">Марка и модель автомобиля</label>
+                        <input type="text" class="form-control" id="order-car">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                <button id="save-order-button" type="button" class="btn btn-primary">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $('#orderEditDialog').on('shown.bs.modal', function (event) {
+        let button = $(event.relatedTarget);
+        let orderId = button.data('orderid');
+        let modal = $(this);
+
+        if (orderId) {
+            $.get({
+                url: '/api/v1/order/' + orderId,
+                success: (order) => {
+                    modal.find('#order-id').val(order.id);
+                    modal.find('#order-description').val(order.description);
+                    modal.find('#order-status').val(order.status);
+                    modal.find('#order-orderDate').val(order.orderDate);
+                    modal.find('#order-car').val(order.car);
+
+
+                    $.get({
+                        url: '/api/v1/client',
+                        success: (clients) => {
+                            let selectClient = modal.find('#order-client');
+                            selectClient.empty();
+
+                            clients.forEach(client => {
+                                selectClient.append(`<option value="${client.id}">${client.name}</option>`);
+                            });
+
+
+                            selectClient.val(order.client.id);
+                        },
+                        error: (err) => {
+                            alert('Ошибка при получении данных клиентов: ' + JSON.stringify(err));
+                        }
+                    });
+                },
+                error: (err) => {
+                    alert('Ошибка при получении данных заказа: ' + JSON.stringify(err));
+                }
+            });
+        }
+    });
+
+
+
+    $('#save-order-button').click(function() {
+        console.log('Кнопка сохранения нажата');
+        let modal = $('#orderEditDialog');
+        let order = {
+            id: modal.find('#order-id').val(),
+            description: modal.find('#order-description').val(),
+            car: modal.find('#order-car').val(),
+            status: modal.find('#order-status').val(),
+            orderDate: modal.find('#order-orderDate').val(),
+            client: {
+                id: modal.find('#order-client').val()
+            }
+        };
+
+        console.log('Данные заказа для отправки: ', order);
+
+
+        let token = $("meta[name='_csrf']").attr("content");
+        let header = $("meta[name='_csrf_header']").attr("content");
+
+
+        if (!token || !header) {
+            console.error("CSRF token or header is not found. Please check if meta tags are correctly included.");
+            alert("Ошибка: CSRF токен или заголовок не найдены.");
+            return;
+        }
+
+        $.ajax({
+            url: '/api/v1/order',
+            type: 'POST',
+            data: JSON.stringify(order),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function (xhr) {
+                console.log('Перед отправкой запроса добавляем CSRF заголовок');
+                if (header && token) {
+                    xhr.setRequestHeader(header, token);
+                } else {
+                    console.error("CSRF заголовок или токен отсутствуют. Запрос может быть отклонен сервером.");
+                }
+            },
+            success: () => {
+                console.log('Заказ успешно сохранен');
+                location.reload();
+            },
+            error: (err) => {
+                console.error('Ошибка при сохранении заказа: ', err);
+                alert('Ошибка при сохранении заказа: ' + JSON.stringify(err));
+            }
+        });
+
+        modal.modal('hide');
+    });
+
+
+</script>
+
+
+
+
+<div class="modal fade" id="orderNewDialog" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-black" id="ModalLabel">Добавление заказа</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <input type="hidden" id="order-idn">
+                    <div class="form-group">
+                        <label for="order-clientn" class="col-form-label">Имя клиента</label>
+                        <select class="form-control" id="order-clientn"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="order-statusn" class="col-form-label">Статус</label>
+                        <select class="form-control" id="order-statusn">
+                            <option value="Принято">Принято</option>
+                            <option value="В работе">В работе</option>
+                            <option value="Выполнено">Выполнено</option>
+                            <option value="Отменено">Отменено</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="order-orderDaten" class="col-form-label">Дата заказа</label>
+                        <input type="date" class="form-control" id="order-orderDaten">
+                    </div>
+                    <div class="form-group">
+                        <label for="order-descriptionn" class="col-form-label">Услуга</label>
+                        <input type="text" class="form-control" id="order-descriptionn">
+                    </div>
+                    <div class="form-group">
+                        <label for="order-carn" class="col-form-label">Марка и модель автомобиля</label>
+                        <input type="text" class="form-control" id="order-carn">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                <button id="save-new-order-button" type="button" class="btn btn-primary">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#orderNewDialog').on('shown.bs.modal', function () {
+            $.get({
+                url: '/api/v1/client',
+                success: function (data) {
+                    let clientSelect = $('#order-clientn');
+                    clientSelect.empty();
+                    data.forEach(function (client) {
+                        clientSelect.append(`<option value="${client.id}">${client.name}</option>`);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Ошибка при загрузке клиентов:', xhr.responseText);
+                    alert('Ошибка при загрузке клиентов: ' + xhr.responseText);
+                }
+            });
+        });
+    });
+
+
+
+    $('#save-new-order-button').click(function() {
+        let modal = $('#orderNewDialog');
+        let order = {
+            client: {
+                id: modal.find('#order-clientn').val()
+            },
+            status: modal.find('#order-statusn').val(),
+            orderDate: modal.find('#order-orderDaten').val(),
+            car: modal.find('#order-carn').val(),
+            description: modal.find('#order-descriptionn').val(),
+        };
+
+        let token = $("meta[name='_csrf']").attr("content");
+        let header = $("meta[name='_csrf_header']").attr("content");
+
+        if (!token || !header) {
+            console.error("CSRF token or header is not found.");
+            alert("Ошибка: CSRF токен или заголовок не найдены.");
+            return;
+        }
+
+        $.ajax({
+            url: '/api/v1/order',
+            type: 'POST',
+            data: JSON.stringify(order),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader(header, token);
+            },
+            success: function(response, status, xhr) {
+                console.log('Ответ от сервера: ', response);
+                console.log('Статус ответа: ', xhr.status);
+
+                if (xhr.status === 200) {
+                    location.reload();
+                } else {
+                    console.log('Неудачный запрос, статус:', xhr.status);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Ошибка при сохранении заказа:');
+                console.error('Статус ошибки:', xhr.status);
+                console.error('Текст ошибки:', xhr.responseText);
+                console.error('Ошибка в запросе:', error);
+
+                alert('Ошибка при сохранении заказа: ' + xhr.responseText);
+            }
+        });
+
+
+        modal.modal('hide');
+    });
+
+
+
+
+
+</script>
+
+
+</body>
+</html>
